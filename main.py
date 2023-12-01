@@ -46,10 +46,11 @@ try:
 		)
 except Exception as e:
 	print("Error!", e)
-finally:
-	if connection:
-		connection.close()
-		print("Connection was closed")
+
+# finally:
+# 	if connection:
+# 		connection.close()
+# 		print("Connection was closed")
 
 #################################
 
@@ -57,45 +58,24 @@ finally:
 def create_cat(cat: Cat):
 	psycopg2.extras.register_uuid()
 	cat_id = str(uuid.uuid4())
-	connection = None
 	try:
-		# connect to bd
-		connection = psycopg2.connect(
-			host=host,
-			user=user,
-			# password=password, # у меня нет пароля в мою БД)))
-			database=db_name
-		)
-		connection.autocommit = True
 		with connection.cursor() as cursor:
-			cursor.execute(
-			"""
-			INSERT INTO cats (cat_id, cat_name, cat_breed)
-			VALUES (%s, %s, %s)
-			""", (cat_id, cat.name, cat.breed)
-			)
+				cursor.execute(
+				"""
+				INSERT INTO cats (cat_id, cat_name, cat_breed)
+				VALUES (%s, %s, %s)
+				""", (cat_id, cat.name, cat.breed)
+				)
 	except Exception as e:
 		print("Error!", e)
 		raise HTTPException(status_code=500, detail="Failed to create cat")
-	finally:
-		if connection:
-			connection.close()
-			print("Connection was closed")
 	return cat_id
+
 
 @app.get("/get_cat/{cat_id}", response_model=Cat)
 def get_cat(cat_id: str):
-	connection = None
 	cat = None
 	try:
-		# connect to bd
-		connection = psycopg2.connect(
-			host=host,
-			user=user,
-			# password=password, # у меня нет пароля в мою БД)))
-			database=db_name
-		)
-		connection.autocommit = True
 		with connection.cursor() as cursor:
 			cursor.execute(
 			"""
@@ -108,9 +88,5 @@ def get_cat(cat_id: str):
 	except Exception as e:
 		print("Error!", e)
 		raise HTTPException(status_code=404, detail="Cat not found")
-	finally:
-		if connection:
-			connection.close()
-			print("Connection was closed")
 	print(cat)
 	return cat
